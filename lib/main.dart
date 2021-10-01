@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:freelance_chef_app/pages/drawer_page.dart';
 
 void main() {
   runApp(const App());
@@ -29,6 +30,10 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width/3,
+      drawer: Drawer(
+        child: DrawerPage(),
+      ),
       appBar: AppBar(
           title: const Text("FreelanceChefApp"),
       ),
