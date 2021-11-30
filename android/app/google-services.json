@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1017473487207",
+    "project_id": "chef-s-honor",
+    "storage_bucket": "chef-s-honor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017473487207:android:075f3bbde969c6ccb11fc2",
+        "android_client_info": {
+          "package_name": "com.chill.freelance_chef_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1017473487207-0qbj6jl5lmp3uip58mf9gn2o5nnoamj6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCA0PkEaTbd4j-YXglrkH1PE2Ucb2U-f5g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1017473487207-0qbj6jl5lmp3uip58mf9gn2o5nnoamj6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

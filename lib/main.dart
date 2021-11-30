@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:freelance_chef_app/bloc/network_service/network_bloc.dart';
 import 'package:freelance_chef_app/pages/drawer_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-void main() {
+import 'bloc/user_service/user_service_bloc.dart';
+import 'observer/simple_observer.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Bloc.observer = SimpleBlocObserver();
   runApp(const App());
 }
 
@@ -11,12 +18,19 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "FreelanceChefApp",
-      home: const HomePage(),
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<NetworkBloc>(create: (_) => NetworkBloc()),
+        BlocProvider<UserServiceBloc>(create: (context) => UserServiceBloc(context.read<NetworkBloc>())),
+        // TODO TEMPORARY DEPRECATED -> BlocProvider<GlobalServiceBloc>(create: (ctx) => GlobalServiceBloc(context.read<NetworkBloc>(), ctx)),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "FreelanceChefApp",
+        home: HomePage(),
+        theme: ThemeData(
+          primarySwatch: Colors.deepPurple
+        ),
       ),
     );
   }
