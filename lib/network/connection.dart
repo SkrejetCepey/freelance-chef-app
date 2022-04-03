@@ -7,94 +7,72 @@ import 'package:freelance_chef_app/models/user.dart';
 import 'package:freelance_chef_app/network/jwt_dio.dart';
 
 import 'api.dart';
+import 'connection_error.dart';
 
 class Connection {
   late JWTDio _jwtDio;
-  late AccessibleByJWTTokens? _c;
+  late StreamController tokensChangesJwtDio;
+  final BaseOptions baseOptions =
+      BaseOptions(connectTimeout: 15000, receiveTimeout: 15000);
 
   Connection(AccessibleByJWTTokens? c) {
-    _c = c;
-    _jwtDio = JWTDio(_c);
+    _jwtDio = JWTDio(c, baseOptions);
+    tokensChangesJwtDio = _jwtDio.tokensChanges;
   }
 
   bool isConnectionSupportJwt() => _jwtDio.isConnectionSupportJwt();
 
+  Future tryCatchDioErrorBodyWrapper(Future Function() v) async {
+    try {
+      await v.call();
+    } on DioError catch (e) {
+      // print(e.response!.statusCode!.toString() + " " + e.response!.data);
+      throw ConnectionError.onDioError(e);
+    }
+  }
+
   void upgradeConnection(AccessibleByJWTTokens obj) {
-    // TODO think about it
-    if (_c != null) {
+    if (isConnectionSupportJwt()) {
       throw Exception("Connection already upgraded!");
     }
-    _c = obj;
-    _jwtDio = JWTDio(_c);
+    _jwtDio.updateAccessibleByJWTTokens(obj);
   }
 
   void degradeConnection() {
-    _c = null;
-    _jwtDio = JWTDio(_c);
+    _jwtDio.updateAccessibleByJWTTokens(null);
   }
 
   Future<String> getAllOrders() async {
-    try {
-      var request = await _jwtDio.getUri(Uri.parse(API.ORDERS));
-      return request.toString();
-    } on DioError catch (e) {
-      throw e;
-    }
+    Response? response;
+    await tryCatchDioErrorBodyWrapper(() async {
+      response = await _jwtDio.getUri(Uri.parse(API.ORDERS));
+      return response;
+    });
+    return response.toString();
   }
 
   Future<void> addOrder(Order order) async {
-    try {
-      print(order.getJsonableForm(JsonableOrderType.Add).getJson());
-      var request = await _jwtDio.postUriObjectWithValidateByTokens(
-          Uri.parse(API.ORDERS),
-          order.getJsonableForm(JsonableOrderType.Add),
-          _c!);
-    } on DioError catch (e) {
-      throw e;
-    }
+    await tryCatchDioErrorBodyWrapper(() async {
+      await _jwtDio.postUriObjectWithValidateByTokens(
+          Uri.parse(API.ORDERS), order.getJsonableForm(JsonableOrderType.Add));
+    });
   }
 
   Future<void> login(User user) async {
-    try {
+    await tryCatchDioErrorBodyWrapper(() async {
       var request = await _jwtDio.postUriObject(
           Uri.parse(API.LOGIN), user.getJsonableForm(JsonableUserType.Login));
 
       var tokens = request!.data as Map<String, dynamic>;
+      print(tokens);
       user.setTokensByMap(tokens);
-    } on DioError catch (e) {
-      throw e;
-    }
+    });
   }
 
   Future<void> register(User user) async {
-    try {
-      print(user.getJsonableForm(JsonableUserType.Register).getJson());
-      var request = await _jwtDio.postUriObject(Uri.parse(API.REGISTRATION),
+    await tryCatchDioErrorBodyWrapper(() async {
+      await _jwtDio.postUriObject(Uri.parse(API.REGISTRATION),
           user.getJsonableForm(JsonableUserType.Register));
-
-      // return request.toString();
-    } on DioError catch (e) {
-      throw e;
-    }
+    });
   }
 }
-
-// class StaticConnection {
-//   static final JWTDio _jwtDio = JWTDio(null);
-//   // late AccessibleByJWTTokens? _c;
-//
-//   // B(AccessibleByJWTTokens? c) {
-//   //   // _c = c;
-//   //   _jwtDio = JWTDio(_c);
-//   // }
-//
-//   static Future<String> getAllOrders() async {
-//     try {
-//       var request = await _jwtDio.getUri(Uri.parse(API.GET_ALL_ORDERS));
-//       return request.toString();
-//     } on DioError catch (e) {
-//       throw e;
-//     }
-//   }
-//
-// }

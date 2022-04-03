@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:freelance_chef_app/bloc/error_service/error_service_bloc.dart';
 import 'package:freelance_chef_app/bloc/network_service/network_bloc.dart';
 import 'package:freelance_chef_app/bloc/register_form_service/register_form_service_bloc.dart';
 import 'package:freelance_chef_app/bloc/user_service/user_service_bloc.dart';
@@ -10,8 +11,8 @@ import 'package:dio/dio.dart';
 import '../user.dart';
 
 class RegisterForm {
-  static User _mapParametersIntoUser(User user,
-      Map<String, dynamic> parameters) {
+  static User _mapParametersIntoUser(
+      User user, Map<String, dynamic> parameters) {
     user.username = parameters["username"];
     user.surname = parameters["surname"];
     user.name = parameters["name"];
@@ -37,14 +38,17 @@ class RegisterForm {
         TextEditingController _passwordController = TextEditingController();
         TextEditingController _roleNameController = TextEditingController();
         return BlocProvider<RegisterFormServiceBloc>(
-          create: (_) => RegisterFormServiceBloc(context.read<NetworkBloc>(), context.read<UserServiceBloc>()),
+          create: (_) => RegisterFormServiceBloc(
+              context.read<NetworkBloc>(),
+              context.read<UserServiceBloc>(),
+              context.read<ErrorServiceBloc>()),
           child: BlocBuilder<RegisterFormServiceBloc, RegisterFormServiceState>(
             builder: (context, state) {
               if (state is RegisterFormServiceIdle) {
-                if (state.haveUnhandledError()) {
-                  Future.microtask(() =>
-                      Alert.alert(context, state.getMessageAndHandleError()));
-                }
+                // if (state.haveUnhandledError()) {
+                //   Future.microtask(() =>
+                //       Alert.alert(context, state.getMessageAndHandleError()));
+                // }
                 return AlertDialog(
                   title: const Text('Register'),
                   content: SingleChildScrollView(
@@ -93,14 +97,9 @@ class RegisterForm {
                         print(_userParameters.length);
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
-                          print(_userParameters.length);
-                          try {
-                            context.read<RegisterFormServiceBloc>().add(
-                                RegisterFormSendData(_mapParametersIntoUser(
-                                    _user, _userParameters)));
-                          } on DioError catch (e) {
-                            throw e;
-                          }
+                          context.read<RegisterFormServiceBloc>().add(
+                              RegisterFormSendData(_mapParametersIntoUser(
+                                  _user, _userParameters)));
                         }
                       },
                     ),
@@ -109,19 +108,17 @@ class RegisterForm {
               } else if (state is RegisterFormServiceWaitData) {
                 return AlertDialog(
                   content: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        maxWidth: 50.0,
-                        maxHeight: 50.0
-                    ),
+                    constraints:
+                        BoxConstraints(maxWidth: 50.0, maxHeight: 50.0),
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
                   ),
                 );
               } else if (state is RegisterFormServiceSuccess) {
-                Future.microtask(() =>
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Registration and login success!"))))
+                Future.microtask(() => ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(
+                            content: Text("Registration and login success!"))))
                     .whenComplete(() {
                   Navigator.of(context).pop();
                 });

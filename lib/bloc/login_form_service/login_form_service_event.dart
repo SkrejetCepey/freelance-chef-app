@@ -5,6 +5,7 @@ abstract class LoginFormServiceEvent {}
 
 class LoginFormSendData extends LoginFormServiceEvent {
   final User user;
+  bool stateStayInAccountSwitch;
 
-  LoginFormSendData(this.user);
+  LoginFormSendData(this.user, this.stateStayInAccountSwitch);
 }

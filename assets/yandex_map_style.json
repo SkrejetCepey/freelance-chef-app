@@ -1,0 +1,11 @@
+[{
+  "types": "point",
+  "tags": {
+    "all": [
+      "poi"
+    ]
+  },
+  "stylers": {
+    "visibility": "off"
+  }
+}]

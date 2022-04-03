@@ -25,8 +25,15 @@ dev_dependencies:
   rive: ^0.7.33
   flutter_lints: ^1.0.0
   simple_animations: ^4.0.1
-  sqflite: ^2.0.0+4
+  sqflite: ^2.0.1
+  convert: ^3.0.1
+  canonical_json: ^1.1.0
   dio: ^4.0.3
+  equatable: ^2.0.3
+  flutter_datetime_picker: ^1.5.1
+  google_maps_flutter: ^2.1.1
+  yandex_mapkit: ^1.1.1
+  permission_handler: ^8.3.0
 
 flutter_icons:
   image_path: "assets/images/icon.png"
@@ -41,4 +48,9 @@ flutter:
     - assets/rives/ball1.riv
     - assets/rives/panwithpotato.riv
     - assets/images/background.png
+    - assets/images/chef_marker.png
+    - assets/images/user_marker.png
+    - assets/google_map_style.json
+    - assets/yandex_map_style.json
+
 

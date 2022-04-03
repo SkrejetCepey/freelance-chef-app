@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:freelance_chef_app/models/buyer_list_entry.dart';
 import 'package:freelance_chef_app/models/interfaces/marketplace_entry.dart';
+import 'package:freelance_chef_app/models/seller_item.dart';
 import 'package:freelance_chef_app/models/seller_list_entry.dart';
+import 'package:freelance_chef_app/models/templates_seller_items.dart';
 import 'package:freelance_chef_app/network/connection.dart';
 
 class MarketplaceService {
@@ -26,12 +30,21 @@ class MarketplaceService {
     return 2;
   }
 
-  Future<List<MarketplaceEntry>> getMarketplaceEntryByCurrentType() async {
+  Future<List<SellerListEntry>> getMarketplaceEntryByCurrentType() async {
     if (_typeMarketPlace == TypeMarketPlace.buyer) {
-      return List.generate(3, (_) => const BuyerListEntry());
+      return List.generate(sellerItems.length, (i) => SellerListEntry(sellerItem: sellerItems[i]));
     } else if (_typeMarketPlace == TypeMarketPlace.seller) {
-      print(await _connection.getAllOrders());
-      return List.generate(3, (_) => const SellerListEntry());
+
+      String str = await _connection.getAllOrders();
+      // print(str);
+      // print(jsonDecode(str));
+
+      // var reqjson = json.decode(string);
+      // print(reqjson[0]);
+      // print("zalupa");
+      // print(SellerItem.fromJson(decodedObjects[0] as Map<String, dynamic>));
+
+      return List.generate(sellerItems.length, (i) => SellerListEntry(sellerItem: sellerItems[i]));
     } else {
       throw Exception("Can't respond current MarketplaceEntry type");
     }

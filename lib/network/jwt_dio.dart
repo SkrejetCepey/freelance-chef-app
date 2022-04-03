@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -8,7 +9,8 @@ import 'api.dart';
 
 class JWTDio {
   late final Dio _dio;
-  late AccessibleByJWTTokens? _accessibleByJWTTokens;
+  AccessibleByJWTTokens? _accessibleByJWTTokens;
+  var tokensChanges = StreamController<Map<String, dynamic>>();
 
   JWTDio(AccessibleByJWTTokens? accessibleByJWTTokens, [BaseOptions? options]) {
     _accessibleByJWTTokens = accessibleByJWTTokens;
@@ -19,7 +21,8 @@ class JWTDio {
     return _accessibleByJWTTokens != null;
   }
 
-  void updateAccessibleByJWTTokens(AccessibleByJWTTokens accessibleByJWTTokens) {
+  void updateAccessibleByJWTTokens(
+      AccessibleByJWTTokens? accessibleByJWTTokens) {
     _accessibleByJWTTokens = accessibleByJWTTokens;
   }
 
@@ -30,8 +33,12 @@ class JWTDio {
 
     switch (e.response!.statusCode) {
       case 401:
+        print("MIDDLEWARE WORK!");
         var tokens = await _refreshTokens(_accessibleByJWTTokens!);
+        tokens["refreshToken"] = _accessibleByJWTTokens!.refreshToken!;
+        print(tokens);
         _accessibleByJWTTokens!.setTokensByMap(tokens);
+        tokensChanges.add(tokens);
         return;
     }
     throw e;
@@ -40,7 +47,7 @@ class JWTDio {
   Future<Map<String, dynamic>> _refreshTokens(AccessibleByJWTTokens obj) async {
     try {
       var request = await _dio.postUri(Uri.parse(API.REFRESH),
-          data: json.encode({'RefreshToken': obj.refreshToken}),
+          data: json.encode(obj.refreshToken),
           options: Options(headers: {'content-type': 'application/json'}));
 
       return request.data as Map<String, dynamic>;
@@ -68,9 +75,8 @@ class JWTDio {
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
   }) {
-    options = Options(headers: {
-      'content-type': 'application/json'
-    });
+    options ??= Options(headers: {'content-type': 'application/json'});
+
     return _dio.postUri(uri,
         data: jsonable.getJson(),
         options: options,
@@ -80,30 +86,49 @@ class JWTDio {
 
   Future<Response<dynamic>>? postUriObjectWithValidateByTokens(
     Uri uri,
-    Jsonable jsonable,
-    AccessibleByJWTTokens obj, {
+    Jsonable jsonable, {
     Options? options,
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
-  }) {
+  }) async {
+    if (_accessibleByJWTTokens == null) {
+      throw Exception("Need to upgrade JWTDio with AccessibleByJWTTokens");
+    }
     if (options == null) {
       options = Options(headers: {
         'content-type': 'application/json',
-        "Authorization": "Bearer ${obj.accessToken}"
+        "Authorization": "Bearer ${_accessibleByJWTTokens!.accessToken}"
       });
     } else if (options.headers == null) {
       options.headers = {
         'content-type': 'application/json',
-        "Authorization": "Bearer ${obj.accessToken}"
+        "Authorization": "Bearer ${_accessibleByJWTTokens!.accessToken}"
       };
     } else if (options.headers!["Authorization"] == null) {
-      options.headers!["Authorization"] = "Bearer ${obj.accessToken}";
+      options.headers!["Authorization"] =
+          "Bearer ${_accessibleByJWTTokens!.accessToken}";
     }
 
-    return postUriObject(uri, jsonable,
-        options: options,
-        cancelToken: cancelToken,
-        onReceiveProgress: onReceiveProgress);
+    print(jsonable.getJson() + " " + options.headers!["Authorization"]);
+
+    try {
+      return await postUriObject(uri, jsonable,
+          options: options,
+          cancelToken: cancelToken,
+          onReceiveProgress: onReceiveProgress)!;
+    } on DioError catch (e) {
+      print("ERROR JWTDIO: ${e.response!.statusCode}");
+      try {
+        await _middlewareAccessErrorsHandler(e);
+        print("Ошибочка была обработана!");
+        return postUriObject(uri, jsonable,
+            options: options,
+            cancelToken: cancelToken,
+            onReceiveProgress: onReceiveProgress)!;
+      } on DioError {
+        rethrow;
+      }
+    }
   }
 
   Future<Response<dynamic>>? postUri(
@@ -126,7 +151,7 @@ class JWTDio {
       CancelToken? cancelToken,
       void Function(int, int)? onSendProgress,
       void Function(int, int)? onReceiveProgress,
-      required AccessibleByJWTTokens obj}) {
+      required AccessibleByJWTTokens obj}) async {
     if (options == null) {
       options = Options(headers: {
         'content-type': 'application/json',
@@ -149,7 +174,17 @@ class JWTDio {
           onSendProgress: onSendProgress,
           onReceiveProgress: onReceiveProgress);
     } on DioError catch (e) {
-      _middlewareAccessErrorsHandler(e);
+      try {
+        await _middlewareAccessErrorsHandler(e);
+        return _dio.postUri(uri,
+            data: data,
+            options: options,
+            cancelToken: cancelToken,
+            onSendProgress: onSendProgress,
+            onReceiveProgress: onReceiveProgress);
+      } on DioError {
+        rethrow;
+      }
     }
   }
 }

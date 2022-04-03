@@ -5,14 +5,14 @@ class BuyerFormTile extends StatelessWidget {
   String valueName;
   String titleValue;
   TextInputType? keyboardType;
-  TextEditingController controller;
+  TextEditingController? controller;
 
   BuyerFormTile(
       {Key? key,
       required this.value,
       required this.valueName,
       required this.titleValue,
-      required this.controller,
+        this.controller,
       this.keyboardType})
       : super(key: key);
 

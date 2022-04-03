@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freelance_chef_app/bloc/network_service/network_bloc.dart';
 import 'package:freelance_chef_app/models/interfaces/marketplace_entry.dart';
 import 'package:freelance_chef_app/models/interfaces/networkable.dart';
+import 'package:freelance_chef_app/models/seller_list_entry.dart';
 import 'package:freelance_chef_app/services/marketplace_service.dart';
 import 'package:meta/meta.dart';
 
@@ -35,7 +36,7 @@ class MarketplaceServiceBloc
     return _marketplaceService.getCurrentMarketplaceType().index;
   }
 
-  Future<List<MarketplaceEntry>> getMarketplaceEntryListByCurrentType() async {
+  Future<List<SellerListEntry>> getMarketplaceEntryListByCurrentType() async {
     return await _marketplaceService.getMarketplaceEntryByCurrentType();
   }
 

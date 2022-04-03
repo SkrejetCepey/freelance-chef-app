@@ -9,7 +9,10 @@ enum JsonableOrderType {
 class Order {
   String? id;
   String? title;
-  String? author;
+  String? description;
+  String? cost;
+  String? deadline;
+  String? specialId;
 
 
   Jsonable getJsonableForm(JsonableOrderType type) {
@@ -29,9 +32,13 @@ class OrderAdd implements Jsonable {
 
   @override
   String getJson() {
-    return json.encode(<String, dynamic>{"id": order.id,
+    return json.encode(<String, dynamic>{
       "title": order.title,
-      "author": order.author});
+      "description": order.description,
+      "cost": int.parse(order.cost!),
+      "deadline": order.deadline,
+      "specialId": int.parse(order.specialId!)
+    });
   }
 
 }

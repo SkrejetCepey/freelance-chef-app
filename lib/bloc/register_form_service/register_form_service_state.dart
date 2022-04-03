@@ -1,7 +1,7 @@
 part of 'register_form_service_bloc.dart';
 
 @immutable
-abstract class RegisterFormServiceState with ErrorThrowable {}
+abstract class RegisterFormServiceState {}
 
 class RegisterFormServiceInitial extends RegisterFormServiceState {}
 

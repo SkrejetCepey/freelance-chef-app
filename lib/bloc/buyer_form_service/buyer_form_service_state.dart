@@ -1,7 +1,7 @@
 part of 'buyer_form_service_bloc.dart';
 
 @immutable
-abstract class BuyerFormServiceState with ErrorThrowable {}
+abstract class BuyerFormServiceState{}
 
 class BuyerFormServiceInitial extends BuyerFormServiceState {}
 class BuyerFormServiceAvailable extends BuyerFormServiceState {}

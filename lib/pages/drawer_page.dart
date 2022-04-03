@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freelance_chef_app/bloc/user_service/user_service_bloc.dart';
 import 'package:freelance_chef_app/models/user.dart';
+import 'package:freelance_chef_app/pages/world_map.dart';
+import 'package:freelance_chef_app/pages/world_map_yandex.dart';
 
 import 'debug/user_runtime_properties.dart';
 import 'marketplace.dart';
@@ -29,13 +31,20 @@ class DrawerPage extends StatelessWidget {
                   ),
                 );
               } else {
-                return const DrawerHeader(
-                  child: Text("UnathorisedUser"),
+                return DrawerHeader(
+                  child: ListTile(
+                    title: Text("UnathorisedUser"),
+                  ),
                 );
               }
             }),
             ListTile(
-                title: Text("Marketplace"),
+                title: Row(
+                  children: [
+                    Icon(Icons.shopping_cart),
+                    Text("Marketplace"),
+                  ],
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
@@ -44,6 +53,36 @@ class DrawerPage extends StatelessWidget {
                           builder: (context) => MarketplacePage()));
                 }),
             ListTile(title: Text("Messenger *soon*")),
+            ListTile(
+              title: Text("WorldMap"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => WorldMap()));
+              },
+            ),
+            ListTile(
+              title: Text("WorldMapYandex"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => WorldMapYandex()));
+              },
+            ),
+            // ListTile(
+            //   title: Text("Test snow"),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //             builder: (context) => TestPage(child: Center(child: Text("Suka"),),)));
+            //   },
+            // )
           ],
         ),
       ),

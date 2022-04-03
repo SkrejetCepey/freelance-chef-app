@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freelance_chef_app/bloc/marketplace_service/marketplace_service_bloc.dart';
 import 'package:freelance_chef_app/bloc/network_service/network_bloc.dart';
+import 'package:freelance_chef_app/custom/season_appbar.dart';
 import 'package:freelance_chef_app/models/buyer_form/buyer_form.dart';
 import 'package:freelance_chef_app/models/marketplace_list_builder.dart';
 import 'package:freelance_chef_app/services/marketplace_service.dart';
@@ -21,15 +22,15 @@ class MarketplacePage extends StatelessWidget {
                 marketplaceServiceBloc.getCurrentTypeMarketplaceIndex(),
             length: marketplaceServiceBloc.getTypeMarketplaceSize(),
             child: Scaffold(
-              appBar: AppBar(
-                title: Row(
+              appBar: SeasonAppBar(
+                titleWidget: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Icon(Icons.shopping_cart),
-                    Text("Marketplace"),
+                    Text("Marketplace")
                   ],
                 ),
-                bottom: TabBar(
+                bottomWidget: TabBar(
                   onTap: (value) => marketplaceServiceBloc.add(
                       MarketplaceServiceEventSelectType(
                           TypeMarketPlace.values[value])),
@@ -42,7 +43,7 @@ class MarketplacePage extends StatelessWidget {
                     )
                   ],
                 ),
-              ),
+              ).build(context),
               body: BlocBuilder<MarketplaceServiceBloc, MarketplaceServiceState>(
                 builder: (context, state) {
                   if (state is MarketplaceServiceBuyerType) {

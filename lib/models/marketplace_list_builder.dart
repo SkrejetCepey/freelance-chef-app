@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:freelance_chef_app/models/interfaces/marketplace_entry.dart';
+import 'package:freelance_chef_app/models/seller_list_entry.dart';
 
 class MarketplaceListBuilder extends StatelessWidget {
-  final Future<List<MarketplaceEntry>> marketplaceEntry;
+  final Future<List<SellerListEntry>> marketplaceEntry;
 
   const MarketplaceListBuilder({Key? key, required this.marketplaceEntry})
       : super(key: key);
@@ -19,18 +18,65 @@ class MarketplaceListBuilder extends StatelessWidget {
           const SizedBox(
             height: 25.0,
           ),
-          FutureBuilder<List<MarketplaceEntry>>(
+          FutureBuilder<List<SellerListEntry>>(
             future: marketplaceEntry,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return ListView.builder(
+                List my = [];
+                List other = [];
+                snapshot.data!.forEach((element) {
+                  print(element.sellerItem.contractorId);
+                  print(null);
+                  if (element.sellerItem.contractorId != null) {
+                    my.add(element);
+                  } else {
+                    other.add(element);
+                  }
+                });
+                print(my.length.toString() + " " + other.length.toString());
+                return ListView(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    return snapshot.data![index];
-                  },
+                  children: [
+                    Builder(
+                      builder: (context) {
+                        if (my.isEmpty) {
+                          return Container();
+                        } else {
+                          return ListTile(
+                            title: Text("My work:"),
+                          );
+                        }
+                      },
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: my.length,
+                      itemBuilder: (context, index) {
+                        return my[index];
+                      },
+                    ),
+                    ListTile(
+                      title: Text("Open orders:"),
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: other.length,
+                      itemBuilder: (context, index) {
+                        return other[index];
+                      },
+                    ),
+                  ],
                 );
+                // return ListView.builder(
+                //   shrinkWrap: true,
+                //   physics: const NeverScrollableScrollPhysics(),
+                //   itemCount: snapshot.data!.length,
+                //   itemBuilder: (context, index) {
+                //     return snapshot.data![index];
+                //   },
+                // );
               } else {
                 return Center(
                   child: CircularProgressIndicator(),

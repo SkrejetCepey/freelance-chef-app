@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:freelance_chef_app/bloc/error_service/error_service_bloc.dart';
 import 'package:freelance_chef_app/bloc/login_form_service/login_form_service_bloc.dart';
 import 'package:freelance_chef_app/bloc/network_service/network_bloc.dart';
+import 'package:freelance_chef_app/bloc/repository/repository_bloc.dart';
 import 'package:freelance_chef_app/bloc/user_service/user_service_bloc.dart';
 import 'package:freelance_chef_app/models/register_form/register_form.dart';
-import 'package:freelance_chef_app/utils/alert_dialog.dart';
-import 'package:provider/src/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dio/dio.dart';
+import 'package:freelance_chef_app/models/stay_in_account_switch/stay_in_account_switch.dart';
+import 'package:freelance_chef_app/pages/register_page.dart';
 
 import '../user.dart';
 import 'login_form_tile.dart';
@@ -21,6 +22,10 @@ class LoginForm {
   }
 
   static Future<void> showMyDialog(BuildContext context) async {
+
+    Map<String, dynamic> params = {'stateStayInAccountSwitch':false};
+    // bool stateStayInAccountSwitch = false;
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -34,13 +39,18 @@ class LoginForm {
         TextEditingController _passwordController = TextEditingController();
         return BlocProvider<LoginFormServiceBloc>(
           create: (_) => LoginFormServiceBloc(
-              context.read<NetworkBloc>(), context.read<UserServiceBloc>()),
+              context.read<NetworkBloc>(),
+              context.read<UserServiceBloc>(),
+              context.read<RepositoryBloc>(),
+              context.read<ErrorServiceBloc>()),
           child: BlocBuilder<LoginFormServiceBloc, LoginFormServiceState>(
             builder: (context, state) {
               if (state is LoginFormServiceIdle) {
-                if (state.haveUnhandledError()) {
-                  Future.microtask(() =>
-                      Alert.alert(context, state.getMessageAndHandleError()));
+                if (state is LoginFormServiceSuccess) {
+                  Future.microtask(() => ScaffoldMessenger.of(context)
+                      .showSnackBar(
+                          SnackBar(content: Text(state.successMessage))));
+                  Navigator.of(context).pop();
                 }
                 return AlertDialog(
                   actionsAlignment: MainAxisAlignment.center,
@@ -65,6 +75,7 @@ class LoginForm {
                               valueName: "password",
                               titleValue: "Password",
                               controller: _passwordController),
+                          StayInAccountSwitch(params: params),
                         ],
                       ),
                     ),
@@ -77,15 +88,9 @@ class LoginForm {
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
-                            try {
-                              context.read<LoginFormServiceBloc>().add(
-                                  LoginFormSendData(_mapParametersIntoUser(
-                                      _user, _userParameters)));
-                              // Navigator.of(context).pop();
-                            } on DioError catch (e) {
-                              await Alert.alert(
-                                  context, e.response!.data.toString());
-                            }
+                            context.read<LoginFormServiceBloc>().add(
+                                LoginFormSendData(_mapParametersIntoUser(
+                                    _user, _userParameters), params['stateStayInAccountSwitch']));
                           }
                         },
                       ),
@@ -98,7 +103,8 @@ class LoginForm {
                           child: Text("register"),
                           onPressed: () {
                             Navigator.of(context).pop();
-                            RegisterForm.showMyDialog(context);
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage()));
+                            // RegisterForm.showMyDialog(context);
                           },
                         )
                       ],
@@ -108,22 +114,13 @@ class LoginForm {
               } else if (state is LoginFormServiceWaitData) {
                 return AlertDialog(
                   content: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: 50.0,
-                      maxHeight: 50.0
-                    ),
+                    constraints:
+                        BoxConstraints(maxWidth: 50.0, maxHeight: 50.0),
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
                   ),
                 );
-              } else if (state is LoginFormServiceSuccess) {
-                Future.microtask(() => ScaffoldMessenger.of(context)
-                    .showSnackBar(
-                        SnackBar(content: Text(state.successMessage))));
-                Navigator.of(context).pop();
-                // TODO maybe a little dirty
-                return Container();
               } else {
                 return Center(
                   child: Text("Something going wrong!"),

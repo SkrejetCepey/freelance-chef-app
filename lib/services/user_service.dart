@@ -10,6 +10,16 @@ class UserService {
     _user = user;
   }
 
+  void changeTokens(Map<String, dynamic> tokens) {
+    if (_user != null) {
+      _user!.accessToken = tokens["accessToken"];
+      _user!.refreshToken = tokens["refreshToken"];
+    } else {
+    throw Exception("UserServiceError: User not init!");
+    }
+
+  }
+
   void initUser(User user) {
     if (userExists()) {
       throw Exception("UserServiceError: User already init!");

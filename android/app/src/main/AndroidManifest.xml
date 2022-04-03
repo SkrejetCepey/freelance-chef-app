@@ -1,8 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.chill.freelance_chef_app">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
    <application
         android:label="FreelanceChefApp"
         android:icon="@mipmap/ic_launcher">
+       <meta-data android:name="com.google.android.geo.API_KEY"
+           android:value="AIzaSyA3Fl5UyFLoiLT9jJCO-IQKVQgUDxGkXeU"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
